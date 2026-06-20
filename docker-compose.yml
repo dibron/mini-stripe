@@ -1,0 +1,148 @@
+version: '3.8'
+
+# =============================================================================
+# LOCAL DEVELOPMENT STACK — Stripe Learning Platform
+# Starts: PostgreSQL, Kafka (KRaft mode), Redis, Kafka UI
+# Usage: docker-compose up -d
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 15 — one instance, four schemas (one per service)
+  # In production each service would have its own database cluster.
+  # For local dev, we isolate via schemas.
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: stripe-postgres
+    environment:
+      POSTGRES_USER: stripe
+      POSTGRES_PASSWORD: stripe_dev
+      POSTGRES_DB: stripe_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stripe -d stripe_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - stripe-network
+
+  # ---------------------------------------------------------------------------
+  # Apache Kafka 3.6 — KRaft mode (no ZooKeeper dependency)
+  # Single broker for local dev. Production uses 3+ brokers.
+  # ---------------------------------------------------------------------------
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: stripe-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - ./infra/kafka/topics.sh:/docker-entrypoint-initdb.d/topics.sh
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - stripe-network
+
+  # ---------------------------------------------------------------------------
+  # Kafka topic initializer — creates all required topics on startup
+  # ---------------------------------------------------------------------------
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: stripe-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/init-topics.sh"]
+    volumes:
+      - ./infra/kafka/init-topics.sh:/init-topics.sh
+    networks:
+      - stripe-network
+    restart: on-failure
+
+  # ---------------------------------------------------------------------------
+  # Kafka UI — browse topics, consumer groups, messages
+  # Access at: http://localhost:8080
+  # ---------------------------------------------------------------------------
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: stripe-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: true
+    networks:
+      - stripe-network
+
+  # ---------------------------------------------------------------------------
+  # Redis 7 — distributed locks, rate limiting, caching, saga state
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: stripe-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - stripe-network
+
+  # ---------------------------------------------------------------------------
+  # Redis Commander — browse Redis keys in browser
+  # Access at: http://localhost:8085
+  # ---------------------------------------------------------------------------
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: stripe-redis-ui
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8085:8081"
+    depends_on:
+      - redis
+    networks:
+      - stripe-network
+
+volumes:
+  postgres_data:
+  kafka_data:
+  redis_data:
+
+networks:
+  stripe-network:
+    driver: bridge

@@ -1,0 +1,37 @@
+{
+  "eventType": "PaymentSettled",
+  "version": "1.0",
+  "topic": "payment-events",
+  "partitionKey": "merchantId",
+  "description": "Terminal success event. Emitted when funds are fully moved and confirmed by settlement. Merchants listen to this to know they can release goods.",
+  "fields": {
+    "eventId":           { "type": "string", "format": "uuid", "required": true },
+    "eventType":         { "type": "string", "value": "PaymentSettled" },
+    "eventVersion":      { "type": "string", "value": "1.0" },
+    "occurredAt":        { "type": "string", "format": "ISO-8601", "required": true },
+    "paymentId":         { "type": "string", "format": "uuid", "required": true },
+    "customerWalletId":  { "type": "string", "format": "uuid", "required": true },
+    "merchantWalletId":  { "type": "string", "format": "uuid", "required": true },
+    "amountCents":       { "type": "integer", "minimum": 1, "required": true },
+    "feeAmountCents":    { "type": "integer", "minimum": 0, "required": true },
+    "netAmountCents":    { "type": "integer", "minimum": 1, "required": true },
+    "currency":          { "type": "string", "pattern": "^[A-Z]{3}$", "required": true },
+    "settlementBatchId": { "type": "string", "required": true },
+    "settledAt":         { "type": "string", "format": "ISO-8601", "required": true }
+  },
+  "example": {
+    "eventId": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
+    "eventType": "PaymentSettled",
+    "eventVersion": "1.0",
+    "occurredAt": "2025-06-21T02:00:00.000Z",
+    "paymentId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "customerWalletId": "wal_customer_123",
+    "merchantWalletId": "wal_merchant_456",
+    "amountCents": 5000,
+    "feeAmountCents": 145,
+    "netAmountCents": 4855,
+    "currency": "USD",
+    "settlementBatchId": "batch_20250621_001",
+    "settledAt": "2025-06-21T02:00:00.000Z"
+  }
+}

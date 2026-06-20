@@ -1,0 +1,33 @@
+{
+  "eventType": "FundsDebited",
+  "version": "1.0",
+  "topic": "wallet-events",
+  "partitionKey": "walletId",
+  "description": "Emitted by wallet-service when funds are successfully debited. Consumed by ledger-service to create an immutable ledger entry.",
+  "fields": {
+    "eventId":           { "type": "string", "format": "uuid", "required": true },
+    "eventType":         { "type": "string", "value": "FundsDebited" },
+    "eventVersion":      { "type": "string", "value": "1.0" },
+    "occurredAt":        { "type": "string", "format": "ISO-8601", "required": true },
+    "transactionId":     { "type": "string", "format": "uuid", "required": true },
+    "paymentId":         { "type": "string", "format": "uuid", "required": true },
+    "walletId":          { "type": "string", "format": "uuid", "required": true },
+    "amountCents":       { "type": "integer", "minimum": 1, "required": true },
+    "currency":          { "type": "string", "pattern": "^[A-Z]{3}$", "required": true },
+    "balanceAfterCents": { "type": "integer", "required": true },
+    "idempotencyKey":    { "type": "string", "required": true }
+  },
+  "example": {
+    "eventId": "9a1b2c3d-5e6f-7890-abcd-ef1234567890",
+    "eventType": "FundsDebited",
+    "eventVersion": "1.0",
+    "occurredAt": "2025-06-20T10:30:01.234Z",
+    "transactionId": "txn_abc123",
+    "paymentId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "walletId": "wal_customer_123",
+    "amountCents": 5000,
+    "currency": "USD",
+    "balanceAfterCents": 95000,
+    "idempotencyKey": "client-req-xyz-789"
+  }
+}

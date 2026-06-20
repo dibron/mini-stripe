@@ -1,0 +1,31 @@
+# Phase 4 skeleton — fill in during Kubernetes week
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: stripe-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: stripe-platform/payment-service:latest
+          ports:
+            - containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 15

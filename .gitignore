@@ -1,0 +1,35 @@
+# Build
+target/
+build/
+bin/
+*.class
+*.jar
+.gradle/
+
+# Gradle — keep wrapper committed
+!gradlew
+!gradlew.bat
+!gradle/wrapper/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Docker volumes
+postgres_data/
+kafka_data/
+redis_data/
+
+# Secrets (never commit)
+*.env
+application-local.yml
+application-secrets.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

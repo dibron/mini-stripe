@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stripe-platform
+  labels:
+    project: stripe-learning-platform

@@ -1,0 +1,32 @@
+{
+  "eventType": "PaymentInitiated",
+  "version": "1.0",
+  "topic": "payment-events",
+  "partitionKey": "walletId",
+  "description": "Emitted when a payment is created and submitted for processing.",
+  "fields": {
+    "eventId":        { "type": "string", "format": "uuid", "required": true },
+    "eventType":      { "type": "string", "value": "PaymentInitiated" },
+    "eventVersion":   { "type": "string", "value": "1.0" },
+    "occurredAt":     { "type": "string", "format": "ISO-8601", "required": true },
+    "paymentId":      { "type": "string", "format": "uuid", "required": true },
+    "walletId":       { "type": "string", "format": "uuid", "required": true },
+    "merchantId":     { "type": "string", "format": "uuid", "required": true },
+    "amountCents":    { "type": "integer", "minimum": 1, "required": true,
+                        "note": "Always in smallest currency unit. $50.00 = 5000" },
+    "currency":       { "type": "string", "pattern": "^[A-Z]{3}$", "required": true },
+    "idempotencyKey": { "type": "string", "required": true }
+  },
+  "example": {
+    "eventId": "7f3d8a21-4b5c-4e9f-a123-456789abcdef",
+    "eventType": "PaymentInitiated",
+    "eventVersion": "1.0",
+    "occurredAt": "2025-06-20T10:30:00.000Z",
+    "paymentId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "walletId": "wal_customer_123",
+    "merchantId": "mer_456",
+    "amountCents": 5000,
+    "currency": "USD",
+    "idempotencyKey": "client-req-xyz-789"
+  }
+}
