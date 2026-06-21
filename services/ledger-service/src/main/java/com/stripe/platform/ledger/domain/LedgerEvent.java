@@ -2,6 +2,7 @@ package com.stripe.platform.ledger.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ public class LedgerEvent {
     @Column(name = "aggregate_id", nullable = false)  private UUID aggregateId; // wallet_id
     @Column(name = "event_type", nullable = false)    private String eventType;
     @Column(name = "event_version", nullable = false) private String eventVersion;
+    @Type(JsonbType.class)
     @Column(name = "payload", nullable = false, columnDefinition = "jsonb") private String payload;
     @Column(name = "idempotency_key", nullable = false, unique = true) private String idempotencyKey;
     @Column(name = "occurred_at", nullable = false)   private Instant occurredAt;
