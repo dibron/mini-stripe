@@ -5,21 +5,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Payment Saga — orchestrates the cross-service payment flow.
- *
- * SAGA vs TRANSACTION:
- * A database transaction is atomic at the DB level. A saga is "atomic" at the
- * business level — if any step fails, we run compensation steps to undo
- * what already succeeded.
- *
- * COMPENSATION vs ROLLBACK:
- * Rollback undoes a DB change (it never happened). Compensation acknowledges
- * the change happened and creates a new change to reverse it.
- * Example: wallet was debited → compensation is a CREDIT (not an undo).
- *
- * The @Version field prevents two threads from advancing the same saga simultaneously.
- */
+
 @Entity @Table(name = "sagas", schema = "saga")
 @Getter @NoArgsConstructor
 public class PaymentSaga {
@@ -61,5 +47,9 @@ public class PaymentSaga {
                 || next == SagaStatus.FAILED) {
             this.completedAt = Instant.now();
         }
+    }
+
+    public void setFailureReason(String reason) {
+        this.failureReason = reason;
     }
 }
