@@ -4,7 +4,7 @@ spring:
   application:
     name: saga-coordinator
   datasource:
-    url: jdbc:postgresql://localhost:5432/stripe_platform?currentSchema=saga
+    url: jdbc:postgresql://localhost:5433/stripe_platform?currentSchema=saga
     username: saga_svc
     password: saga_dev
   jpa:

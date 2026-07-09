@@ -4,7 +4,7 @@ spring:
   application:
     name: wallet-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/stripe_platform?currentSchema=wallet
+    url: jdbc:postgresql://localhost:5433/stripe_platform?currentSchema=wallet
     username: wallet_svc
     password: wallet_dev
   jpa:

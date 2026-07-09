@@ -4,7 +4,7 @@ spring:
   application:
     name: ledger-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/stripe_platform?currentSchema=ledger
+    url: jdbc:postgresql://localhost:5433/stripe_platform?currentSchema=ledger
     username: ledger_svc
     password: ledger_dev
   jpa:

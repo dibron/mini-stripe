@@ -8,7 +8,7 @@ spring:
     name: payment-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/stripe_platform?currentSchema=payment
+    url: jdbc:postgresql://localhost:5433/stripe_platform?currentSchema=payment
     username: payment_svc
     password: payment_dev
     hikari:
