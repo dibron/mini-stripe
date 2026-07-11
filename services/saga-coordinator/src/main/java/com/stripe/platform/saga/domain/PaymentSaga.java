@@ -2,6 +2,7 @@ package com.stripe.platform.saga.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public class PaymentSaga {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)         private SagaStatus status;
 
+    @Type(JsonbType.class)
     @Column(columnDefinition = "jsonb")            private String failureReason;
     @Column(name = "created_at", nullable = false, updatable = false) private Instant createdAt;
     @Column(name = "updated_at", nullable = false) private Instant updatedAt;

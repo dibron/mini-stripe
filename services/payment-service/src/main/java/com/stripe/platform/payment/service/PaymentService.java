@@ -1,11 +1,17 @@
 package com.stripe.platform.payment.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stripe.platform.payment.domain.OutboxEvent;
 import com.stripe.platform.payment.domain.Payment;
+import com.stripe.platform.payment.repository.OutboxEventRepository;
 import com.stripe.platform.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +28,9 @@ import java.util.UUID;
 @Slf4j
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
+    private final PaymentRepository      paymentRepository;
+    private final OutboxEventRepository  outboxEventRepository;
+    private final ObjectMapper           objectMapper;
 
     /**
      * Initiate a new payment — idempotent.
@@ -47,7 +55,9 @@ public class PaymentService {
         log.info("Payment initiated: id={} amount={}{}",
                  saved.getId(), saved.getAmountCents(), saved.getCurrency());
 
-        // Phase 2: publish PaymentInitiated event to outbox here
+        outboxEventRepository.save(OutboxEvent.of(
+                saved.getId(), "PaymentInitiated", buildPaymentInitiatedPayload(saved)));
+
         return saved;
     }
 
@@ -82,5 +92,24 @@ public class PaymentService {
     private Payment findOrThrow(UUID paymentId) {
         return paymentRepository.findById(paymentId)
             .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+    }
+
+    private String buildPaymentInitiatedPayload(Payment p) {
+        try {
+            Map<String, Object> event = new LinkedHashMap<>();
+            event.put("eventId",        UUID.randomUUID().toString());
+            event.put("eventType",      "PaymentInitiated");
+            event.put("eventVersion",   "1.0");
+            event.put("occurredAt",     p.getCreatedAt().toString());
+            event.put("paymentId",      p.getId().toString());
+            event.put("walletId",       p.getWalletId().toString());
+            event.put("merchantId",     p.getMerchantId().toString());
+            event.put("amountCents",    p.getAmountCents());
+            event.put("currency",       p.getCurrency());
+            event.put("idempotencyKey", p.getIdempotencyKey());
+            return objectMapper.writeValueAsString(event);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize PaymentInitiated payload", e);
+        }
     }
 }

@@ -21,7 +21,9 @@ spring:
     consumer:
       group-id: ledger-service
       auto-offset-reset: earliest
-      enable-auto-commit: false   # Manual offset commit for correctness
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 management:
   endpoints:
     web:

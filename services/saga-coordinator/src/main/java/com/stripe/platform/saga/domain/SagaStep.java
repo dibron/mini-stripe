@@ -3,6 +3,7 @@ package com.stripe.platform.saga.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -27,6 +28,7 @@ public class SagaStep {
     @Column(nullable = false, length = 20)
     private String status; // STARTED, COMPLETED, FAILED
 
+    @Type(JsonbType.class)
     @Column(columnDefinition = "jsonb")
     private String payload; // optional detail about this step
 

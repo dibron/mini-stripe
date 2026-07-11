@@ -48,31 +48,31 @@ public class SagaService {
     @Transactional
     public PaymentSaga paymentInitiated(UUID sagaId) {
         return advance(sagaId, SagaStatus.PAYMENT_INITIATED, "PAYMENT_INITIATED",
-                "Payment created and submitted to processor");
+                "{\"message\":\"Payment created and submitted to processor\"}");
     }
 
     @Transactional
     public PaymentSaga walletDebited(UUID sagaId) {
         return advance(sagaId, SagaStatus.WALLET_DEBITED, "WALLET_DEBITED",
-                "Customer wallet debited successfully");
+                "{\"message\":\"Customer wallet debited successfully\"}");
     }
 
     @Transactional
     public PaymentSaga ledgerRecorded(UUID sagaId) {
         return advance(sagaId, SagaStatus.LEDGER_RECORDED, "LEDGER_RECORDED",
-                "Ledger event recorded");
+                "{\"message\":\"Ledger event recorded\"}");
     }
 
     @Transactional
     public PaymentSaga paymentCaptured(UUID sagaId) {
         return advance(sagaId, SagaStatus.PAYMENT_CAPTURED, "PAYMENT_CAPTURED",
-                "Payment captured");
+                "{\"message\":\"Payment captured\"}");
     }
 
     @Transactional
     public PaymentSaga complete(UUID sagaId) {
         return advance(sagaId, SagaStatus.COMPLETED, "SAGA_COMPLETED",
-                "All steps completed successfully");
+                "{\"message\":\"All steps completed successfully\"}");
     }
 
 
@@ -93,19 +93,19 @@ public class SagaService {
     @Transactional
     public PaymentSaga walletCredited(UUID sagaId) {
         return advance(sagaId, SagaStatus.WALLET_CREDITED, "WALLET_CREDITED",
-                "Wallet credited back — compensation complete");
+                "{\"message\":\"Wallet credited back - compensation complete\"}");
     }
 
     @Transactional
     public PaymentSaga paymentVoided(UUID sagaId) {
         return advance(sagaId, SagaStatus.PAYMENT_VOIDED, "PAYMENT_VOIDED",
-                "Payment cancelled — compensation complete");
+                "{\"message\":\"Payment cancelled - compensation complete\"}");
     }
 
     @Transactional
     public PaymentSaga compensated(UUID sagaId) {
         return advance(sagaId, SagaStatus.COMPENSATED, "SAGA_COMPENSATED",
-                "Saga fully compensated — customer not charged");
+                "{\"message\":\"Saga fully compensated - customer not charged\"}");
     }
 
     @Transactional
